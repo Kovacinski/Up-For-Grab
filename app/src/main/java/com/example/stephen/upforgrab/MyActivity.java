@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
 
+import com.parse.Parse;
 import com.parse.ParseACL;
 import com.parse.ParseUser;
 
@@ -16,6 +17,7 @@ public class MyActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Parse.initialize(this, "5h9nDf0DGXlK1LmtMKsljhGvMbZbk0OuoAbDUGeQ", "0ja8tV2dzEenGtQglDt8h5yBaTdS89G3vI7oZjaF");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 

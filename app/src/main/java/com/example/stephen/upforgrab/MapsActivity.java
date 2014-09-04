@@ -2,8 +2,11 @@ package com.example.stephen.upforgrab;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.ParseException;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
@@ -43,6 +46,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
@@ -66,7 +71,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
                 onMyLocationChange(location);
             }
         }
-        Parse.initialize(this, "5h9nDf0DGXlK1LmtMKsljhGvMbZbk0OuoAbDUGeQ", "0ja8tV2dzEenGtQglDt8h5yBaTdS89G3vI7oZjaF");
+
         ParseObject gameScore = new ParseObject("Test");
         gameScore.put("Name", "YES");
         gameScore.put("Location", "Home");
@@ -74,6 +79,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
 
 
     }
+
+
 
     private boolean load(){
         final double latMin = local.getLatitude()-.5;
