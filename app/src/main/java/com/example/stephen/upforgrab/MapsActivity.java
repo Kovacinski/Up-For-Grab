@@ -1,8 +1,10 @@
 package com.example.stephen.upforgrab;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.location.Criteria;
 import android.location.Location;
+import android.net.ParseException;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.widget.TextView;
 
 
@@ -24,8 +27,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationServices;
 
+import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
+import java.util.List;
+
 
 public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLocationChangeListener,  GoogleMap.OnMyLocationButtonClickListener {
 
@@ -38,55 +47,74 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         setContentView(R.layout.activity_maps);
 
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
-        if(status != ConnectionResult.SUCCESS)
-        {
+        if (status != ConnectionResult.SUCCESS) {
             int requestCode = 10;
             Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, requestCode);
             dialog.show();
-        }
-        else
-        {
+        } else {
             FragmentManager fm;
             fm = getSupportFragmentManager();
-            // Getting GoogleMap object from the fragment
-            mMap = ((SupportMapFragment)fm.findFragmentById(R.id.map)).getMap();
-
-            // Enabling MyLocation Layer of Google Map
+            mMap = ((SupportMapFragment) fm.findFragmentById(R.id.map)).getMap();
             mMap.setMyLocationEnabled(true);
-
-            // Getting LocationManager object from System Service LOCATION_SERVICE
             LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             String provider = locationManager.getBestProvider(new Criteria(), true);
 
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-            if(location!=null){
+            if (location != null) {
 
                 onMyLocationChange(location);
             }
         }
         Parse.initialize(this, "5h9nDf0DGXlK1LmtMKsljhGvMbZbk0OuoAbDUGeQ", "0ja8tV2dzEenGtQglDt8h5yBaTdS89G3vI7oZjaF");
-
-
-
+        ParseObject gameScore = new ParseObject("Test");
+        gameScore.put("Name", "YES");
+        gameScore.put("Location", "Home");
+        gameScore.saveInBackground();
 
 
     }
 
-    private void onProviderDisabled(String provider) {
+    private boolean load(){
+        final double latMin = local.getLatitude()-.5;
+        final double latMax = local.getLatitude()+.5;
+        final double longMin= local.getLongitude()-.5;
+        final double longMax= local.getLongitude()+.5;
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("UpForGrab");
+        query.whereGreaterThan("Latitude", latMin);
+        query.whereLessThan("Latitude", latMax);
+        query.whereGreaterThan("Longitude", longMin);
+        query.whereLessThan("Longitude", longMax);
+
+        query.findInBackground(new FindCallback<ParseObject>() {
+            public void done(List<ParseObject> freeStuff, com.parse.ParseException e) {
+                if (e == null) {
+
+                    for (int i = 0; i < freeStuff.size(); i++) {
+                        ParseObject info = freeStuff.get(i);
+                        addMarker(info.getDouble("latitude"),info.getDouble("longitude"),info.getString("title"),info.getString("description") );
+                    }
+                } else {
+                    AlertDialog.Builder error = new AlertDialog.Builder(MapsActivity.this);
+                    error.setTitle("Error ");
+                    error.setMessage("An error occured. Sorry1");
+                    error.show();
+                }
+            }
+
+
+        });
+
+        return true;
     }
 
-
-    private boolean isGooglePlay(){
-
-        int available =  GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if(available == ConnectionResult.SUCCESS)
-            return true;
-        else {
-            return false;
-        }
-
+    private void addMarker(double latitude, double longitude, String title, String description){
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(10, 10))
+                .title("Hello world"));
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -152,7 +180,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
     @Override
     public void onMyLocationChange(Location location) {
         local = location;
-
+        load();
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         LatLng latLng = new LatLng(latitude, longitude);

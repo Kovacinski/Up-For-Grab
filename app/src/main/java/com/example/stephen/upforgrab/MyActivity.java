@@ -8,6 +8,9 @@ import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
 
+import com.parse.ParseACL;
+import com.parse.ParseUser;
+
 
 public class MyActivity extends ActionBarActivity {
 
@@ -15,7 +18,17 @@ public class MyActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
+
+        // sets public writability  on an object-by-object basis in order to protect your data from unauthorized access.
+        ParseUser.enableAutomaticUser();
+        ParseACL defaultACL = new ParseACL();
+        // Optionally enable public read access while disabling public write access.
+        defaultACL.setPublicReadAccess(true);
+        ParseACL.setDefaultACL(defaultACL, true);
+
         Button map = (Button) findViewById(R.id.toMap);
+
+
 
         map.setOnClickListener(new View.OnClickListener() {
             @Override
